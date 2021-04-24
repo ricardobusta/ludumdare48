@@ -24,6 +24,10 @@ namespace Busta.Diggy
         public Mesh bottomLeftCornerTemplate;
         public Mesh bottomRightCornerTemplate;
 
+        public Mesh grassLeft;
+        public Mesh grassCenter;
+        public Mesh grassRight;
+
         public MeshFilter leftDeco;
         public MeshFilter rightDeco;
 
@@ -52,6 +56,7 @@ namespace Busta.Diggy
         {
             var row = Enumerable.Repeat(1, decoWidth).ToArray();
             var grid = Enumerable.Repeat(row, size.y).ToArray();
+            grid[0] = Enumerable.Repeat(3, decoWidth).ToArray();
             var decorationMesh = new Mesh();
             UpdateMesh(grid, 0, decorationMesh);
 
@@ -95,22 +100,49 @@ namespace Busta.Diggy
 
                         var previousRow = grid[(i + offset + grid.Length - 1) % grid.Length];
 
-                        var top = previousRow[j] > 0;
-
+                        var top = previousRow[j] != 0 && previousRow[j] != 3;
                         if (top)
                         {
                             AddMeshTemplate(bottomFaceTemplate, pos, _uvOffsets[element]);
                         }
 
                         var nextRow = grid[(i + offset + 1) % grid.Length];
-                        var bottom = nextRow[j] > 0;
 
+                        var bottom = nextRow[j] > 0;
                         if (bottom)
                         {
                             AddMeshTemplate(topFaceTemplate, pos, _uvOffsets[element]);
                         }
+
+                        if (!top && !left && (j <= 0 || (previousRow[j - 1] != 0 && previousRow[j - 1] != 3)))
+                        {
+                            AddMeshTemplate(bottomRightCornerTemplate, pos, _uvOffsets[element]);
+                        }
+
+                        if (!top && !right && (j >= row.Length - 1 || (previousRow[j + 1] != 0 && previousRow[j + 1] != 3)))
+                        {
+                            AddMeshTemplate(bottomLeftCornerTemplate, pos, _uvOffsets[element]);
+                        }
+
+                        if (!bottom && !left && (j <= 0 || (nextRow[j - 1] != 0 && nextRow[j - 1] != 3)))
+                        {
+                            AddMeshTemplate(topRightCornerTemplate, pos, _uvOffsets[element]);
+                        }
+
+                        if (!bottom && !right && (j >= row.Length - 1 || (nextRow[j + 1] != 0 && nextRow[j + 1] != 3)))
+                        {
+                            AddMeshTemplate(topLeftCornerTemplate, pos, _uvOffsets[element]);
+                        }
                     }
-                    else // wall
+                    else if (element == 3) // Air / Sky
+                    {
+                        var nextRow = grid[(i + offset + 1) % grid.Length];
+                        if (nextRow[j] != 0)
+                        {
+                            AddMeshTemplate(grassCenter, pos, _uvOffsets[element]);
+                        }
+                    }
+                    else
                     {
                         AddMeshTemplate(frontFaceTemplate, pos, _uvOffsets[element]);
                     }
