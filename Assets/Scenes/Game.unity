@@ -155,7 +155,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: {x: 3, y: 16}
+  uvOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 1, y: 0}
+  textureSize: 8
   frontFaceTemplate: {fileID: -4443091407447274737, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  topFaceTemplate: {fileID: 2544404792153441263, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  bottomFaceTemplate: {fileID: -4868613704504655960, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  leftFaceTemplate: {fileID: -4629308971440208095, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  rightFaceTemplate: {fileID: -7066558537761782311, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  topLeftCornerTemplate: {fileID: -6601590300986856325, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  topRightCornerTemplate: {fileID: 1238254146643967155, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  bottomLeftCornerTemplate: {fileID: 3033193908701549812, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
+  bottomRightCornerTemplate: {fileID: 701070634384063608, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
 --- !u!23 &508290384
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -204,7 +217,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 508290382}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: -4443091407447274737, guid: 7a3e21f20ea3d1b4fba63d7f2cce7bc2, type: 3}
 --- !u!4 &508290386
 Transform:
   m_ObjectHideFlags: 0
@@ -596,8 +609,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eacbeddbfcb36724cba7d9b03c98f46d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rowPrefab: {fileID: 5209881660704314707, guid: 0768c1c55fa986d4b8ccf7ede50d5003, type: 3}
-  dirtPrefab: {fileID: 2432215833715442834, guid: 40fe24365c29d0d41aa41f184289f911, type: 3}
-  hazardPrefab: {fileID: 2432215833715442834, guid: ee19e5e7e11b4b14fb00ea429b43a589, type: 3}
-  gridContainer: {fileID: 1124697221}
-  boardSize: {x: 3, y: 10}
+  gridSize: {x: 3, y: 16}
+  gridMesh: {fileID: 508290383}
