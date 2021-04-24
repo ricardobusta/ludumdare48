@@ -60,7 +60,7 @@ namespace Busta.Diggy
 
         private void Update()
         {
-            var input = Input.GetKeyDown(KeyCode.LeftArrow) ? -1 : Input.GetKeyDown(KeyCode.RightArrow) ? 1 : 0;
+            var input = GetInput();
             if (input != 0)
             {
                 _gridTween?.Kill();
@@ -81,15 +81,22 @@ namespace Busta.Diggy
                     _offset++;
                     
                     gridMesh.transform.position = pos + Vector3.down;
-                    _gridTween = gridMesh.transform.DOMoveY(maxYPosition, 0.3f);
+                    _gridTween = gridMesh.transform.DOMoveY(maxYPosition, 0.1f);
                 }
                 else
                 {
-                    _gridTween = gridMesh.transform.DOMoveY(_yPosition, 0.3f);
+                    _gridTween = gridMesh.transform.DOMoveY(_yPosition, 0.1f);
                 }
                 
                 gridMesh.UpdateMesh(_grid, _offset);
             }
+        }
+
+        private int GetInput()
+        {
+            return Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) ? -1
+                : Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) ? 1
+                : 0;
         }
     }
 }

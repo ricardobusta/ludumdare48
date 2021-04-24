@@ -24,8 +24,8 @@ namespace Busta.Diggy
         public Mesh bottomLeftCornerTemplate;
         public Mesh bottomRightCornerTemplate;
 
-        public MeshFilter decorationLeft;
-        public MeshFilter decorationRight;
+        public MeshFilter leftDeco;
+        public MeshFilter rightDeco;
 
         private List<Vector3> _vertexBuffer;
         private List<Vector2> _uvBuffer;
@@ -54,10 +54,16 @@ namespace Busta.Diggy
             var grid = Enumerable.Repeat(row, size.y).ToArray();
             var decorationMesh = new Mesh();
             UpdateMesh(grid, 0, decorationMesh);
-            decorationLeft.mesh = decorationMesh;
-            decorationLeft.transform.localPosition = new Vector3(-decoWidth, 0, 0);
-            decorationRight.mesh = decorationMesh;
-            decorationRight.transform.localPosition = new Vector3(size.x, 0, 0);
+
+            var trLeft = leftDeco.transform;
+            trLeft.SetParent(transform);
+            trLeft.localPosition = new Vector3(-decoWidth, 0, 0);
+            leftDeco.mesh = decorationMesh;
+
+            var trRight = rightDeco.transform;
+            trRight.SetParent(transform);
+            trRight.localPosition = new Vector3(size.x, 0, 0);
+            rightDeco.mesh = decorationMesh;
         }
 
         public void UpdateMesh(int[][] grid, int offset, Mesh updateMesh = null)
@@ -78,13 +84,13 @@ namespace Busta.Diggy
                         var left = j <= 0 || row[j - 1] > 0;
                         if (left)
                         {
-                            AddMeshTemplate(rightFaceTemplate, pos + Vector3.left, _uvOffsets[element]);
+                            AddMeshTemplate(rightFaceTemplate, pos, _uvOffsets[element]);
                         }
 
                         var right = j >= row.Length - 1 || row[j + 1] > 0;
                         if (right)
                         {
-                            AddMeshTemplate(leftFaceTemplate, pos + Vector3.right, _uvOffsets[element]);
+                            AddMeshTemplate(leftFaceTemplate, pos, _uvOffsets[element]);
                         }
 
                         var previousRow = grid[(i + offset + grid.Length - 1) % grid.Length];
@@ -93,7 +99,7 @@ namespace Busta.Diggy
 
                         if (top)
                         {
-                            AddMeshTemplate(bottomFaceTemplate, pos + Vector3.up, _uvOffsets[element]);
+                            AddMeshTemplate(bottomFaceTemplate, pos, _uvOffsets[element]);
                         }
 
                         var nextRow = grid[(i + offset + 1) % grid.Length];
@@ -101,7 +107,7 @@ namespace Busta.Diggy
 
                         if (bottom)
                         {
-                            AddMeshTemplate(topFaceTemplate, pos + Vector3.down, _uvOffsets[element]);
+                            AddMeshTemplate(topFaceTemplate, pos, _uvOffsets[element]);
                         }
                     }
                     else // wall
@@ -121,7 +127,6 @@ namespace Busta.Diggy
             mesh.normals = _normalBuffer.ToArray();
             mesh.triangles = _triangleBuffer.ToArray();
             mesh.UploadMeshData(false);
-            Debug.Log($"{mesh.vertexCount}{mesh.uv.Length}{mesh.normals.Length}{mesh.triangles.Length}");
         }
 
         private void ClearBuffers()
