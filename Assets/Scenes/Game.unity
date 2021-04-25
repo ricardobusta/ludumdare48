@@ -2483,6 +2483,7 @@ MonoBehaviour:
   scoreCanvas: {fileID: 154756739}
   startGameButton: {fileID: 477409470}
   highScoreLabel: {fileID: 490332001}
+  breakParticlePrefab: {fileID: 3197686142474453920, guid: ba9faa84d2abfff42a7a35847852feb7, type: 3}
 --- !u!1 &1293356220
 GameObject:
   m_ObjectHideFlags: 0

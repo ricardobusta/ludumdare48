@@ -68,6 +68,8 @@ namespace Busta.Diggy
 
         public TMP_Text highScoreLabel;
 
+        public ParticleSystem breakParticlePrefab;
+
         private int _score;
         private float _health;
 
@@ -82,7 +84,9 @@ namespace Busta.Diggy
 
         private float _totalSpawnWeight;
 
-        private TMP_Text[] rewardTextList;
+        private TMP_Text[] _rewardTextList;
+
+        private ParticleSystem[] _breakParticles;
 
         private EventSystem _eventSystem;
 
@@ -133,11 +137,18 @@ namespace Busta.Diggy
 
             gridMesh.InitDecor(gridSize, decoWidth);
 
-            rewardTextList = new TMP_Text[10];
-            for (var i = 0; i < rewardTextList.Length; i++)
+            _rewardTextList = new TMP_Text[10];
+            for (var i = 0; i < _rewardTextList.Length; i++)
             {
-                var newText = rewardTextList[i] = Instantiate(rewardTextPrefab);
+                var newText = _rewardTextList[i] = Instantiate(rewardTextPrefab);
                 newText.gameObject.SetActive(false);
+            }
+
+            _breakParticles = new ParticleSystem[10];
+            for (var i = 0; i < _breakParticles.Length; i++)
+            {
+                var particles = _breakParticles[i] = Instantiate(breakParticlePrefab, gridMesh.transform);
+                particles.gameObject.SetActive(false);
             }
 
             scoreCanvas.gameObject.SetActive(true);
@@ -146,9 +157,9 @@ namespace Busta.Diggy
             startGameButton.onClick.AddListener(StartGame);
 
             ComputeScore(-1);
-            
+
             audioSystem.PlayIdleMusic();
-            
+
             ResetGame();
         }
 
@@ -185,7 +196,7 @@ namespace Busta.Diggy
             _score = 0;
 
             _health = 1;
-            
+
             UpdateHud();
         }
 
@@ -267,7 +278,7 @@ namespace Busta.Diggy
                 ShowRewardText("Time Over!", Color.white);
                 audioSystem.PlayIdleMusic();
                 ComputeScore(_score);
-                
+
                 DOVirtual.DelayedCall(1.0f, () =>
                 {
                     scoreCanvas.gameObject.SetActive(true);
@@ -331,6 +342,8 @@ namespace Busta.Diggy
                 player.transform.rotation = RotationRight;
                 player.transform.localScale = ScaleRight;
             }
+            
+            SpawnParticle(index-1);
 
             switch (row[index])
             {
@@ -401,27 +414,42 @@ namespace Busta.Diggy
                 playerScores.scores.Remove(min);
                 playerScores.scores.Add(newScore);
                 playerScores.SortScore();
-                Debug.Log("Writing "+ JsonUtility.ToJson(playerScores));
+                Debug.Log("Writing " + JsonUtility.ToJson(playerScores));
                 PlayerPrefs.SetString(PLAYER_SCORE_KEY, JsonUtility.ToJson(playerScores));
             }
 
             var index = playerScores.scores.IndexOf(newScore);
 
             _stringBuilder.Clear();
-            for(var i=0;i<playerScores.scores.Count;i++)
+            for (var i = 0; i < playerScores.scores.Count; i++)
             {
                 var scoreString = playerScores.scores[i].ToString(SCORE_FORMAT);
-                _stringBuilder.AppendLine(i==index?$"<color=yellow>{scoreString}</color>":scoreString);
+                _stringBuilder.AppendLine(i == index ? $"<color=yellow>{scoreString}</color>" : scoreString);
             }
 
             highScoreLabel.text = _stringBuilder.ToString();
+        }
+
+        private void SpawnParticle(int pos)
+        {
+            for (var i = 0; i < _breakParticles.Length; i++)
+            {
+                var particles = _breakParticles[i];
+                if (!particles.gameObject.activeSelf)
+                {
+                    particles.gameObject.SetActive(true);
+                    particles.transform.position = Vector3.right * pos;
+                    DOVirtual.DelayedCall(0.3f, () => { particles.gameObject.SetActive(false); });
+                    return;
+                }
+            }
         }
 
         private void ShowRewardText(string value, Color color)
         {
             for (var i = 0; i < 10; i++)
             {
-                var text = rewardTextList[i];
+                var text = _rewardTextList[i];
                 if (!text.gameObject.activeSelf)
                 {
                     text.gameObject.SetActive(true);
