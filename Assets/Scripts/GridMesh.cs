@@ -162,6 +162,12 @@ namespace Busta.Diggy
                             if (nextRow[j] != 0)
                             {
                                 AddMeshTemplate(grassCenter, pos, Vector2.zero);
+                            }else if (j <= 0 || nextRow[j - 1] != 0)
+                            {
+                                AddMeshTemplate(grassRight, pos, Vector2.zero);
+                            }else if (j >= row.Length - 1 || nextRow[j + 1] != 0)
+                            {
+                                AddMeshTemplate(grassLeft, pos, Vector2.zero);
                             }
 
                             break;

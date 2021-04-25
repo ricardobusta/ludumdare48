@@ -15,7 +15,9 @@ namespace Busta.Diggy
             public int id;
         }
 
-        [Header("Config")] public Vector2Int gridSize = new Vector2Int(3, 20);
+        [Header("Config")]
+        public Vector2Int gridSize = new Vector2Int(3, 20);
+
         public Vector2Int initialPosition = new Vector2Int(-1, 0);
         public int decoWidth = 5;
         public int initialOffset;
@@ -23,7 +25,9 @@ namespace Busta.Diggy
 
         public SpawnConfig[] spawnConfigs;
 
-        [Header("Refs")] public GridMesh gridMesh;
+        [Header("Refs")]
+        public GridMesh gridMesh;
+
         public GameObject[] surfaceObjects;
         public AudioSystem audioSystem;
 
@@ -150,23 +154,14 @@ namespace Busta.Diggy
             }
 
             var input = GetInput();
-            if (input != 0)
+            if (input != 1)
             {
                 _gridTween?.Kill();
 
                 var rowIndex = (_yPosition + 1) % _grid.Length;
                 var row = _grid[rowIndex];
 
-                row[1] = 0;
-
-                if (input == -1)
-                {
-                    row[0] = 0;
-                }
-                else
-                {
-                    row[2] = 0;
-                }
+                HitRow(row, input);
 
 
                 _yPosition++;
@@ -200,11 +195,37 @@ namespace Busta.Diggy
             }
         }
 
+        private void HitRow(int[] row, int index)
+        {
+            switch (row[index])
+            {
+                case 1: // Dirt
+                    audioSystem.PlayDigSfx();
+                    break;
+                case 2: // Gold
+                    audioSystem.PlayBreakSfx();
+                    break;
+                case 4: // Diamond
+                    audioSystem.PlayBreakSfx();
+                    break;
+                case 5: // Hurt
+                    audioSystem.PlayHurtSfx();
+                    break;
+                case 6: // PickAxe
+                    audioSystem.PlayPowerUpSfx();
+                    break;
+                default:
+                    break;
+            }
+
+            row[index] = 0;
+            row[1] = 0;
+        }
+
         private int GetInput()
         {
-            return Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) ? -1
-                : Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) ? 1
-                : 0;
+            return Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) ? 0 :
+                Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) ? 2 : 1;
         }
     }
 }
