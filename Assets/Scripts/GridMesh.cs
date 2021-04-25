@@ -8,10 +8,14 @@ namespace Busta.Diggy
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class GridMesh : MonoBehaviour
     {
+        [Header("Config")]
         public Vector2[] uvOffsets;
+
         public int textureSize;
 
+        [Header("Assets")]
         public Mesh frontFaceTemplate;
+
         public Mesh backFaceTemplate;
 
         public Mesh topFaceTemplate;
@@ -28,8 +32,8 @@ namespace Busta.Diggy
         public Mesh grassCenter;
         public Mesh grassRight;
 
-        public MeshFilter leftDeco;
-        public MeshFilter rightDeco;
+        [Header("References")]
+        public MeshFilter edges;
 
         private List<Vector3> _vertexBuffer;
         private List<Vector2> _uvBuffer;
@@ -54,21 +58,28 @@ namespace Busta.Diggy
 
         public void InitDecor(Vector2Int size, int decoWidth)
         {
-            var row = Enumerable.Repeat(1, decoWidth).ToArray();
+            var w = decoWidth * 2 + size.x;
+            var row = InitRow(1, w, decoWidth).ToArray();
             var grid = Enumerable.Repeat(row, size.y).ToArray();
-            grid[0] = Enumerable.Repeat(3, decoWidth).ToArray();
+            grid[0] = InitRow(3, w, decoWidth).ToArray();
             var decorationMesh = new Mesh();
             UpdateMesh(grid, 0, decorationMesh);
 
-            var trLeft = leftDeco.transform;
-            trLeft.SetParent(transform);
-            trLeft.localPosition = new Vector3(-decoWidth, 0, 0);
-            leftDeco.mesh = decorationMesh;
+            var edgeTransform = edges.transform;
+            edgeTransform.SetParent(transform);
+            edgeTransform.localPosition = new Vector3(-decoWidth, 0, 0);
+            edges.mesh = decorationMesh;
+        }
 
-            var trRight = rightDeco.transform;
-            trRight.SetParent(transform);
-            trRight.localPosition = new Vector3(size.x, 0, 0);
-            rightDeco.mesh = decorationMesh;
+        private int[] InitRow(int element, int count, int edgeSize)
+        {
+            var row = Enumerable.Repeat(element, count).ToArray();
+            for (var i = edgeSize; i < row.Length - edgeSize; i++)
+            {
+                row[i] = -1;
+            }
+
+            return row;
         }
 
         public void UpdateMesh(int[][] grid, int offset, Mesh updateMesh = null)
@@ -82,74 +93,93 @@ namespace Busta.Diggy
                     var pos = new Vector3(j, -i, 0);
                     var element = row[j];
 
-                    if (element == 0) // hole
+                    switch (element)
                     {
-                        AddMeshTemplate(backFaceTemplate, pos, _uvOffsets[element]);
-
-                        var left = j <= 0 || row[j - 1] > 0;
-                        if (left)
+                        case -1: // Empty
+                            break;
+                        case 0: // hole
                         {
-                            AddMeshTemplate(rightFaceTemplate, pos, _uvOffsets[element]);
-                        }
+                            AddMeshTemplate(backFaceTemplate, pos, _uvOffsets[element]);
 
-                        var right = j >= row.Length - 1 || row[j + 1] > 0;
-                        if (right)
+                            int neighbor = 0;
+
+                            var left = j <= 0 || (neighbor = row[j - 1]) != 0;
+                            if (left)
+                            {
+                                AddMeshTemplate(rightFaceTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            var right = j >= row.Length - 1 || (neighbor = row[j + 1]) != 0;
+                            if (right)
+                            {
+                                AddMeshTemplate(leftFaceTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            var previousRow = grid[(i + offset + grid.Length - 1) % grid.Length];
+
+                            var top = (neighbor = previousRow[j]) != 0 && neighbor != 3;
+                            if (top)
+                            {
+                                AddMeshTemplate(bottomFaceTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            var nextRow = grid[(i + offset + 1) % grid.Length];
+
+                            var bottom = (neighbor = nextRow[j]) != 0;
+                            if (bottom)
+                            {
+                                AddMeshTemplate(topFaceTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            if (!top && !left && (j <= 0 || ((neighbor = previousRow[j - 1]) != 0 && neighbor != 3)))
+                            {
+                                AddMeshTemplate(bottomRightCornerTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            if (!top && !right && (j >= row.Length - 1 ||
+                                                   ((neighbor = previousRow[j + 1]) != 0 && neighbor != 3)))
+                            {
+                                AddMeshTemplate(bottomLeftCornerTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            if (!bottom && !left && (j <= 0 || ((neighbor = nextRow[j - 1]) != 0 && neighbor != 3)))
+                            {
+                                AddMeshTemplate(topRightCornerTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            if (!bottom && !right &&
+                                (j >= row.Length - 1 || ((neighbor = nextRow[j + 1]) != 0 && neighbor != 3)))
+                            {
+                                AddMeshTemplate(topLeftCornerTemplate, pos, GetUvOffset(element, neighbor));
+                            }
+
+                            break;
+                        }
+                        // Air / Sky
+                        case 3:
                         {
-                            AddMeshTemplate(leftFaceTemplate, pos, _uvOffsets[element]);
-                        }
+                            var nextRow = grid[(i + offset + 1) % grid.Length];
+                            if (nextRow[j] != 0)
+                            {
+                                AddMeshTemplate(grassCenter, pos, Vector2.zero);
+                            }
 
-                        var previousRow = grid[(i + offset + grid.Length - 1) % grid.Length];
-
-                        var top = previousRow[j] != 0 && previousRow[j] != 3;
-                        if (top)
-                        {
-                            AddMeshTemplate(bottomFaceTemplate, pos, _uvOffsets[element]);
+                            break;
                         }
-
-                        var nextRow = grid[(i + offset + 1) % grid.Length];
-
-                        var bottom = nextRow[j] > 0;
-                        if (bottom)
-                        {
-                            AddMeshTemplate(topFaceTemplate, pos, _uvOffsets[element]);
-                        }
-
-                        if (!top && !left && (j <= 0 || (previousRow[j - 1] != 0 && previousRow[j - 1] != 3)))
-                        {
-                            AddMeshTemplate(bottomRightCornerTemplate, pos, _uvOffsets[element]);
-                        }
-
-                        if (!top && !right && (j >= row.Length - 1 || (previousRow[j + 1] != 0 && previousRow[j + 1] != 3)))
-                        {
-                            AddMeshTemplate(bottomLeftCornerTemplate, pos, _uvOffsets[element]);
-                        }
-
-                        if (!bottom && !left && (j <= 0 || (nextRow[j - 1] != 0 && nextRow[j - 1] != 3)))
-                        {
-                            AddMeshTemplate(topRightCornerTemplate, pos, _uvOffsets[element]);
-                        }
-
-                        if (!bottom && !right && (j >= row.Length - 1 || (nextRow[j + 1] != 0 && nextRow[j + 1] != 3)))
-                        {
-                            AddMeshTemplate(topLeftCornerTemplate, pos, _uvOffsets[element]);
-                        }
-                    }
-                    else if (element == 3) // Air / Sky
-                    {
-                        var nextRow = grid[(i + offset + 1) % grid.Length];
-                        if (nextRow[j] != 0)
-                        {
-                            AddMeshTemplate(grassCenter, pos, _uvOffsets[element]);
-                        }
-                    }
-                    else
-                    {
-                        AddMeshTemplate(frontFaceTemplate, pos, _uvOffsets[element]);
+                        // Every other solid block
+                        default:
+                            AddMeshTemplate(frontFaceTemplate, pos, _uvOffsets[element]);
+                            break;
                     }
                 }
             }
 
             UpdateMesh(updateMesh == null ? _mesh : updateMesh);
+        }
+
+        private Vector2 GetUvOffset(int element, int neighbor)
+        {
+            return element != 3 ? _uvOffsets[neighbor] : Vector2.zero;
         }
 
         private void UpdateMesh(Mesh mesh)

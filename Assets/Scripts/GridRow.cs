@@ -20,7 +20,7 @@ namespace Busta.Diggy
         {
             leftBlock.material = hazardMaterial;
             rightBlock.material = dirtMaterial;
-            
+
             leftBlock.gameObject.SetActive(true);
             centerBlock.gameObject.SetActive(true);
             rightBlock.gameObject.SetActive(true);
@@ -28,8 +28,8 @@ namespace Busta.Diggy
 
         public void BreakRow()
         {
-            (leftHazard?rightBlock:leftBlock).gameObject.SetActive(false);
+            (leftHazard ? rightBlock : leftBlock).gameObject.SetActive(false);
             centerBlock.gameObject.SetActive(false);
-        } 
+        }
     }
 }
