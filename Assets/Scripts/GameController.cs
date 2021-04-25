@@ -44,7 +44,6 @@ namespace Busta.Diggy
         private int[][] _grid;
 
         private Tween _gridTween;
-        private Tween _playerTween;
 
         private float _totalSpawnWeight;
 
@@ -191,30 +190,49 @@ namespace Busta.Diggy
                 gridMesh.UpdateMesh(_grid, _offset);
             }
         }
+        
+        private static readonly Quaternion RotationLeft = Quaternion.Euler(0, 45, 0);
+        private static readonly Quaternion RotationRight = Quaternion.Euler(0, -45, 0);
+        private static readonly Vector3 ScaleLeft = Vector3.one;
+        private static readonly Vector3 ScaleRight = new Vector3(-1, 1, 1);
+        
 
         private void HitRow(int[] row, int index)
         {
-            _playerTween?.Kill();
-            _playerTween = player.transform.DORotate(new Vector3(0, index == 0 ? 45 : -45, 0), 0.05f);
-            
+            if (index == 0)
+            {
+                player.transform.rotation = RotationLeft;
+                player.transform.localScale = ScaleLeft;
+            }
+            else
+            {
+                player.transform.rotation = RotationRight;
+                player.transform.localScale = ScaleRight;
+            }
+
             switch (row[index])
             {
                 case 1: // Dirt
                     audioSystem.PlayDigSfx();
+                    playerAnimator.SetTrigger("attack");
                     break;
                 case 2: // Gold
                     audioSystem.PlayBreakSfx();
+                    playerAnimator.SetTrigger("attack");
                     _score += 1;
                     break;
                 case 4: // Diamond
                     audioSystem.PlayBreakSfx();
+                    playerAnimator.SetTrigger("attack");
                     _score += 5;
                     break;
                 case 5: // Hurt
                     audioSystem.PlayHurtSfx();
+                    playerAnimator.SetTrigger("hurt");
                     break;
                 case 6: // PickAxe
                     audioSystem.PlayPowerUpSfx();
+                    playerAnimator.SetTrigger("attack");
                     break;
                 default:
                     break;
