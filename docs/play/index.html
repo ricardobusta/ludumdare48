@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | deep</title>
+  </head>
+  <body style="text-align: center">
+    <canvas id="unity-canvas" style="width: 525px; height: 700px; background: #231F20"></canvas>
+    <script src="Build/0f2fafc1d12733e57f4dcafb583e4870.js"></script>
+    <script>
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        dataUrl: "Build/1bef8902f8f389feefa4a1046ed24973.data",
+        frameworkUrl: "Build/51ab3f654d4ef6622b85136d5599d35e.js",
+        codeUrl: "Build/e8e8cc82f0ee3c7a0cadb8b49f9900b2.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Busta Games",
+        productName: "deep",
+        productVersion: "0.1",
+      });
+    </script>
+  </body>
+</html>
