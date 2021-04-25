@@ -26,10 +26,15 @@ namespace Busta.Diggy
         public SpawnConfig[] spawnConfigs;
 
         [Header("Refs")]
+        public GameObject player;
+        public Animator playerAnimator;
         public GridMesh gridMesh;
 
         public GameObject[] surfaceObjects;
         public AudioSystem audioSystem;
+
+        private int _score;
+        private float _health;
 
         private bool _surfaceObjectsDisabled;
 
@@ -39,6 +44,7 @@ namespace Busta.Diggy
         private int[][] _grid;
 
         private Tween _gridTween;
+        private Tween _playerTween;
 
         private float _totalSpawnWeight;
 
@@ -54,6 +60,7 @@ namespace Busta.Diggy
 
         private void Start()
         {
+            audioSystem.PlayActionMusic();
             _offset = initialOffset;
             _yPosition = initialPosition.y;
 
@@ -62,26 +69,12 @@ namespace Busta.Diggy
             _grid = new int[gridSize.y][];
             for (var i = 0; i < gridSize.y; i++)
             {
-                var row = _grid[i] = new int[gridSize.x];
-
-                if (i > 0)
-                {
-                    GenerateRow(row);
-                }
-                else
-                {
-                    for (var j = 0; j < gridSize.x; j++)
-                    {
-                        row[j] = 3;
-                    }
-                }
+                _grid[i] = new int[gridSize.x];
             }
 
             gridMesh.InitDecor(gridSize, decoWidth);
 
-            gridMesh.UpdateMesh(_grid, _offset);
-
-            gridMesh.transform.position = new Vector3(initialPosition.x, initialPosition.y, 0);
+            ResetGame();
         }
 
         private void ResetGame()
@@ -111,6 +104,10 @@ namespace Busta.Diggy
             }
 
             _surfaceObjectsDisabled = false;
+
+            _score = 0;
+
+            _health = 1;
         }
 
         private void GenerateRow(int[] row)
@@ -197,6 +194,9 @@ namespace Busta.Diggy
 
         private void HitRow(int[] row, int index)
         {
+            _playerTween?.Kill();
+            _playerTween = player.transform.DORotate(new Vector3(0, index == 0 ? 45 : -45, 0), 0.05f);
+            
             switch (row[index])
             {
                 case 1: // Dirt
@@ -204,9 +204,11 @@ namespace Busta.Diggy
                     break;
                 case 2: // Gold
                     audioSystem.PlayBreakSfx();
+                    _score += 1;
                     break;
                 case 4: // Diamond
                     audioSystem.PlayBreakSfx();
+                    _score += 5;
                     break;
                 case 5: // Hurt
                     audioSystem.PlayHurtSfx();
